@@ -1,0 +1,215 @@
+﻿@using Microsoft.AspNetCore.Authentication;
+@using Microsoft.AspNetCore.Authentication.Cookies;
+@using MonkeyBuisness.Models.Entity
+@using MonkeyBuisness.Models.Enum
+@{
+    ViewData["Title"] = "Tasks";
+}
+<p>
+    <h4 style="margin-left: 20px;" class="mb-3 text-muted">Создание конспекта</h4>
+    <a class="nav-link text-black" asp-area="" asp-controller="Task" asp-action="CreateTask">
+        Create
+    </a>
+<p />
+@* <h4 style="margin-left: 20px;" class="mb-3 text-muted">Создание задачи</h4>
+<form style="margin-left: 20px;" id="createTaskForm">
+    <div class="mb-3">
+        <label class="form-label">Название задачи</label>
+        <input name="Name" type="text" class="form-control" />
+    </div>
+    <label class="form-label">Приоритет задачи</label>
+    <select name="priority" class="form-select mb-3" asp-items="Html.GetEnumSelectList<Priority>()"></select>
+    <div class="mb-3">
+        <label class="form-label">Описание задачи</label>
+        <textarea name="description" type="text" class="form-control" rows="3"></textarea>
+    </div>
+    <p />
+    <button id="createTask" class="btn btn-primary">Создать</button>
+</form> *@
+<br />
+<div class="row" style="margin-left: 20px;">
+    <div class="form-group col-md-6">
+        <label class="col-form-label">Название</label>
+        <input name="nameTask" type="text" class="form-control" />
+    </div>
+    <div class="form-group col-md-6">
+        <label class="col-form-label">Приоритет</label>
+        <select id="prioritySearch" class="form-control mb-3" asp-items="Html.GetEnumSelectList<Priority>()"></select>
+    </div>
+</div>
+<br />
+<table style="margin-left: 20px;" class="table table-light table-hover" id="tableId">
+    <thead>
+        <tr>
+            <th>Название</th>
+            <th>Сложность</th>
+            <th>Описание</th>
+            <th>Готовность</th>
+            <th>Действие</th>
+            <th>Изменить</th>
+            <th>Удалить</th>
+        </tr>
+    </thead>
+    <tbody>
+    </tbody>
+</table>
+
+@section Scripts
+    {
+    <script type="text/javascript" src="https://cdn.datatables.net/1.13.3/js/jquery.dataTables.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+    <script>
+        // $('#createTask').on('click', function (e) {
+        //     e.preventDefault();
+        //     $.ajax({
+        //         type: 'POST',
+        //         url: '@Url.Action("Create", "Task")',
+        //         data: $('#createTaskForm').serialize(),
+        //         dataType: 'json',
+        //         success: function (response) {
+        //             Swal.fire({
+        //                 title: "Информация",
+        //                 text: response.description,
+        //                 icon: 'success',
+        //                 confirmButtonText: 'Окей'
+        //             })
+        //         },
+        //         error: function (response) {
+        //             Swal.fire({
+        //                 title: "Информация",
+        //                 text: response.responseJSON.description,
+        //                 icon: 'error',
+        //                 confirmButtonText: 'Окей'
+        //             })
+        //         }
+        //     })
+        // });
+
+        const swalWithBootstrapButtons = Swal.mixin({
+            customClass: {
+                confirmButton: "btn btn-success",
+            },
+            buttonsStyling: false
+        });
+
+        let taskTable = $('#tableId').DataTable({
+            info: true,
+            serverSide: true,
+            searching: false,
+            paging: false,
+            sorting: false,
+            ajax: {
+                url: '@Url.Action("TaskHandler")',
+                method: 'POST',
+                data: model
+            },
+            columns: [
+                { data: 'name' },
+                { data: 'priority' },
+                { data: 'description' },
+                { data: 'isDone' },
+                {
+                    data: null,
+                    sortable: false,
+                    render: function (data, type) {
+                        return '<button class="btn btn-success btn-sm center-block btn-end">Выполнить</button>';
+                    }
+                },
+                {
+                    data: null,
+                    sortable: false,
+                    render: function change(data, type) {
+                        return '<button class="btn btn-success btn-sm center-block btn-edit">Изменить</button>';
+                    }
+                },
+                {
+                    data: null,
+                    sortable: false,
+                    render: function del(data, type) {
+                        return '<button class="btn btn-success btn-sm center-block btn-delete">Удалить</button>';
+                    }
+                },
+            ],
+            createdRow: function (nRow, data) {
+                $(nRow).find('.btn-end').on('click', function () {
+                    var movieId = data.id;
+                    var url = '@Url.Action("EndTask", "Task")';
+                    window.location.href = url + '?id=' + movieId;
+                });
+                $(nRow).find('.btn-edit').on('click', function () {
+                    var movieId = data.id;
+                    var url = '@Url.Action("EditTask", "Task")';
+                    window.location.href = url + '?id=' + movieId;
+                });
+
+                $(nRow).find('.btn-delete').on('click', function () {
+                    var movieId = data.id;
+                    var url = '@Url.Action("DeleteTask", "Task")';
+                    window.location.href = url + '?id=' + movieId;
+                });
+
+                for (var i = 0; i < taskTable.columns().header().length - 2; i++) {
+                    $('td', nRow).eq(i).css('cursor', 'pointer');
+                }
+            }
+            // ],
+            // createdRow: function (nRow, data) {
+
+            //     var handlerComplete = function () {
+            //         swalWithBootstrapButtons.fire({
+            //             title: "вы уверены?",
+            //             icon: "warning",
+            //             confirmButtonText: "Да!",
+            //             reverseButtons: true
+            //         }).then((result) => {
+            //             if (result.isConfirmed) {
+            //                 $.ajax({
+            //                     tyoe: 'POST',
+            //                     url: '@Url.Action("EndTask")',
+            //                     data: { id: data.id },
+            //                     success: function (response) {
+            //                         Swal.fire({
+            //                             title: "Информация",
+            //                             text: response.description,
+            //                             icon: 'success',
+            //                             confirmButtonText: 'Окей'
+            //                         })
+            //                         taskTable.draw();
+            //                     },
+            //                     error: function (response) {
+            //                         Swal.fire({
+            //                             title: "Информация",
+            //                             text: response.responseJSON.description,
+            //                             icon: 'error',
+            //                             confirmButtonText: 'Окей'
+            //                         })
+            //                     }
+            //                 })
+            //             }
+            //         });
+            //     }
+            //     for (var i = 0; i < taskTable.columns().header().length - 1; i++) {
+            //         $('td', nRow).eq(i).css('cursor', 'pointer');
+
+            //         $('td', nRow).eq(i).on('click', null);
+            //     }
+            //     $('td button', nRow).on('click', handlerComplete);
+            // }
+        });
+
+        function model() {
+            return {
+                Name: $('input[name="nameTask"]').val(),
+                Priority: $('#prioritySearch option:selected').val()
+            }
+        }
+
+        $('input[name="nameTask"]').on('change', function () {
+            taskTable.draw();
+        })
+        $('#prioritySearch').on('change', function () {
+            taskTable.draw();
+        })
+
+    </script>
+}

@@ -1,0 +1,65 @@
+﻿@{
+    ViewData["Title"] = "Notes";
+}
+<p>
+    <h4 style="margin-left: 20px;" class="mb-3 text-muted">Добавление конспекта</h4>
+</p>
+
+<form style="margin-left: 20px;" id="createNoteForm">
+    <div class="input-group mb-3">
+        <span class="input-group-text" id="basic-addon1"></span>
+        <input name="name" type="text" class="form-control" placeholder="Название" aria-label="Username" aria-describedby="basic-addon1">
+    </div>
+
+    <div class="input-group mb-3">
+        <input name="director" type="text" class="form-control" placeholder="Режиссер" aria-label="Режиссер">
+        <span class="input-group-text"></span>
+        <input name="theme" type="text" class="form-control" placeholder="Тема" aria-label="Тема">
+    </div>
+
+    <div class="input-group">
+        <span class="input-group-text">Заметка</span>
+        <textarea name="note" class="form-control" aria-label="With textarea"></textarea>
+    </div>
+    <p></p>
+    <button id="createNote" class="btn btn-primary">Создать</button>
+</form>
+
+@section Scripts
+{
+    <script type="text/javascript" src="https://cdn.datatables.net/1.13.3/js/jquery.dataTables.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+    <script>
+
+        $('#createNote').on('click', function (e) {
+            e.preventDefault();
+            $.ajax({
+                type: 'POST',
+                url: '@Url.Action("Create", "Note")',
+                data: $('#createNoteForm').serialize(),
+                dataType: 'json',
+                success: function (response) {
+
+                    window.location.href = '@Url.Action("Index", "Note")'; // Перенаправление пользователя
+
+                },
+                error: function (response) {
+                    Swal.fire({
+                        title: "Информация",
+                        text: response.responseJSON.description,
+                        icon: 'error',
+                        confirmButtonText: 'Окей'
+                    })
+                }
+            })
+        });
+
+        const swalWithBootstrapButtons = Swal.mixin({
+            customClass: {
+                confirmButton: "btn btn-success",
+            },
+            buttonsStyling: false
+        });
+
+    </script>
+}

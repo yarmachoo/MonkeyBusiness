@@ -1,0 +1,151 @@
+﻿@{
+    ViewData["Title"] = "Notes";
+}
+<p>
+    <h4 style="margin-left: 20px;" class="mb-3 text-muted">Создание конспекта</h4>
+    <a class="nav-link text-black" asp-area="" asp-controller="Note" asp-action="CreateNote">
+        Create
+    </a>
+<p />
+
+<br />
+<div class="row" style="margin-left: 20px;">
+    <div class="form-group col-md-6">
+        <label class="col-form-label">Название</label>
+        <input name="nameNote" type="text" class="form-control" />
+    </div>
+    <div class="form-group col-md-6">
+        <label class="col-form-label">Премдмет</label>
+        <input name="subjectNote" type="text" class="form-control" />
+    </div>
+    <div class="form-group col-md-6">
+        <label class="col-form-label">Тема</label>
+        <input name="themeNote" type="text" class="form-control" />
+    </div>
+    <div class="form-group col-md-6">
+        <label class="col-form-label">Конспект</label>
+        <input name="textNote" type="text" class="form-control" />
+    </div>
+</div>
+<br />
+
+<table style="margin-left: 20px;" class="table table-light table-hover" id="tableId">
+    <thead>
+        <tr>
+            <th>Название</th>
+            <th>Предмет</th>
+            <th>Тема</th>
+            <th>Конспект</th>
+            <th>Изменить</th>
+            <th>Удалить</th>
+        </tr>
+    </thead>
+    <tbody>
+    </tbody>
+</table>
+
+    @section Scripts
+{
+    <script type="text/javascript" src="https://cdn.datatables.net/1.13.3/js/jquery.dataTables.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+    <script>
+
+        const swalWithBootstrapButtons = Swal.mixin({
+            customClass: {
+                confirmButton: "btn btn-success",
+            },
+            buttonsStyling: false
+        });
+
+        let taskTable = $('#tableId').DataTable({
+            info: true,
+            serverSide: true,
+            searching: false,
+            paging: false,
+            sorting: false,
+            ajax: {
+                url: '@Url.Action("NoteHandler")',
+                method: 'POST',
+                data: model
+            },
+            columns: [
+                { data: 'name' },
+                { data: 'subject' },
+                { data: 'theme' },
+                { data: 'note' },
+                {
+                    data: null,
+                    sortable: false,
+                    render: function change(data, type) {
+                        return '<button class="btn btn-success btn-sm center-block btn-edit">Изменить</button>';
+                    }
+                },
+                {
+                    data: null,
+                    sortable: false,
+                    render: function del(data, type) {
+                        return '<button class="btn btn-success btn-sm center-block btn-delete">Удалить</button>';
+                    }
+                },
+            ],
+            createdRow: function (nRow, data) {
+                $(nRow).find('.btn-edit').on('click', function () {
+                    var movieId = data.id;
+                    var url = '@Url.Action("EditNote", "Note")';
+                    window.location.href = url + '?id=' + movieId;
+                });
+
+                $(nRow).find('.btn-delete').on('click', function () {
+                    var movieId = data.id;
+                    var url = '@Url.Action("DeleteNote", "Note")';
+                    window.location.href = url + '?id=' + movieId;
+                });
+
+                for (var i = 0; i < taskTable.columns().header().length - 2; i++) {
+                    $('td', nRow).eq(i).css('cursor', 'pointer');
+                }
+            }
+            //     {
+            //         data: null,
+            //         sortable: false,
+            //         render: function (data, type) {
+            //             return '<button class="btn btn-success btn-sm center-block">Изменить</button>';
+            //         }
+            //     }
+            // ],
+            // createdRow: function (nRow, data) {
+            //     var handlerComplete = function () {
+            //         var movieId = data.id;
+            //         var url = '@Url.Action("EditNote", "Note")'; // Убедитесь, что контроллер и метод указаны правильно
+            //         window.location.href = url + '?id=' + movieId;
+            //     }
+            //     for (var i = 0; i < taskTable.columns().header().length - 1; i++) {
+            //         $('td', nRow).eq(i).css('cursor', 'pointer');
+            //         $('td', nRow).eq(i).on('click', null);
+            //     }
+            //     $('td button', nRow).on('click', handlerComplete);
+            // }
+        });
+
+        function model() {
+            return {
+                Name: $('input[name="nameTask"]').val(),
+                Priority: $('#prioritySearch option:selected').val()
+            }
+        }
+
+        $('input[name="nameNote"]').on('change', function () {
+            taskTable.draw();
+        })
+        $('input[name="subjectNote"]').on('change', function () {
+            taskTable.draw();
+        })
+        $('input[name="themeNote"]').on('change', function () {
+            taskTable.draw();
+        })
+        $('input[name="textNote"]').on('change', function () {
+            taskTable.draw();
+        })
+
+    </script>
+}

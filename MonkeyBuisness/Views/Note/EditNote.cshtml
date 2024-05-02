@@ -1,0 +1,30 @@
+﻿@using MonkeyBuisness.Models.ViewModels.Note;
+@model CreateNoteViewModel
+
+@{
+    ViewData["Title"] = "Edit Note";
+}
+
+<h2>Edit Note</h2>
+
+<form asp-action="EditNote" asp-controller="Note" asp-route-id="@Model.Id" method="post">
+    <div class="form-group">
+        <label asp-for="Name">Name</label>
+        <input asp-for="Name" class="form-control" />
+    </div>
+    <div class="form-group">
+        <label asp-for="Subject">Subject</label>
+        <input asp-for="Subject" class="form-control" />
+    </div>
+    <div class="form-group">
+        <label asp-for="Theme">Theme</label>
+        <input asp-for="Theme" class="form-control" />
+    </div>
+    <div class="form-group">
+        <label asp-for="Note">Note</label>
+        <textarea asp-for="Note" class="form-control"></textarea>
+    </div>
+    <button type="submit" class="btn btn-success">Save Changes</button>
+</form>
+
+<a href="@Url.Action("Index", "Note")" class="btn btn-default">Back to List</a>

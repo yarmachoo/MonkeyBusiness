@@ -1,0 +1,62 @@
+﻿@using Microsoft.AspNetCore.Authentication;
+@using Microsoft.AspNetCore.Authentication.Cookies;
+@using MonkeyBuisness.Models.Entity
+@using MonkeyBuisness.Models.Enum
+@{
+    ViewData["Title"] = "Tasks";
+}
+<p>
+    <h4 style="margin-left: 20px;" class="mb-3 text-muted">Создание задачи</h4>
+</p>
+<h4 style="margin-left: 20px;" class="mb-3 text-muted">Создание задачи</h4>
+<form style="margin-left: 20px;" id="createTaskForm">
+    <div class="mb-3">
+        <label class="form-label">Название задачи</label>
+        <input name="Name" type="text" class="form-control" />
+    </div>
+    <label class="form-label">Приоритет задачи</label>
+    <select name="priority" class="form-select mb-3" asp-items="Html.GetEnumSelectList<Priority>()"></select>
+    <div class="mb-3">
+        <label class="form-label">Описание задачи</label>
+        <textarea name="description" type="text" class="form-control" rows="3"></textarea>
+    </div>
+    <p />
+    <button id="createTask" class="btn btn-primary">Создать</button>
+</form>
+
+@section Scripts
+{
+    <script type="text/javascript" src="https://cdn.datatables.net/1.13.3/js/jquery.dataTables.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+    <script>
+
+        $('#createTask').on('click', function (e) {
+            e.preventDefault();
+            $.ajax({
+                type: 'POST',
+                url: '@Url.Action("Create", "Task")',
+                data: $('#createTaskForm').serialize(),
+                dataType: 'json',
+                success: function (response) {
+                    window.location.href = '@Url.Action("Index", "Task")'; // Перенаправление пользователя
+                },
+                error: function (response) {
+                    Swal.fire({
+                        title: "Информация",
+                        text: response.responseJSON.description,
+                        icon: 'error',
+                        confirmButtonText: 'Окей'
+                    })
+                }
+            })
+        });
+
+        const swalWithBootstrapButtons = Swal.mixin({
+            customClass: {
+                confirmButton: "btn btn-success",
+            },
+            buttonsStyling: false
+        });
+
+    </script>
+}

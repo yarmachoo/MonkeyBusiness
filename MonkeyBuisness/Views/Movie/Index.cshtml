@@ -1,0 +1,143 @@
+﻿@{
+    ViewData["Title"] = "Movies";
+}
+<p>
+    <h4 style="margin-left: 20px;" class="mb-3 text-muted">Добавление фильма</h4>
+    <a class="nav-link text-black" asp-area="" asp-controller="Movie" asp-action="CreateMovie">
+        Create
+    </a>
+</p>
+
+<br />
+<div class="row" style="margin-left: 20px;">
+    <div class="form-group col-md-6">
+        <label class="col-form-label">Название</label>
+        <input name="nameMovie" type="text" class="form-control" />
+    </div>
+    <div class="form-group col-md-6">
+        <label class="col-form-label">Автор</label>
+        <input name="directorMovie" type="text" class="form-control" />
+    </div>
+    <div class="form-group col-md-6">
+        <label class="col-form-label">Тема</label>
+        <input name="themeMovie" type="text" class="form-control" />
+    </div>
+    <div class="form-group col-md-6">
+        <label class="col-form-label">Заметка</label>
+        <input name="textMovie" type="text" class="form-control" />
+    </div>
+</div>
+<br />
+
+<table style="margin-left: 20px;" class="table table-light table-hover" id="tableId">
+    <thead>
+        <tr>
+            <th>Название</th>
+            <th>Автор</th>
+            <th>Тема</th>
+            <th>Заметка</th>
+            <th>Изменить</th>
+            <th>Удалить</th>
+        </tr>
+    </thead>
+    <tbody>
+    </tbody>
+</table>
+
+@section Scripts
+{
+    <script type="text/javascript" src="https://cdn.datatables.net/1.13.3/js/jquery.dataTables.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+    <script>
+
+        const swalWithBootstrapButtons = Swal.mixin({
+            customClass: {
+                confirmButton: "btn btn-success",
+            },
+            buttonsStyling: false
+        });
+
+        let taskTable = $('#tableId').DataTable({
+            info: true,
+            serverSide: true,
+            searching: false,
+            paging: false,
+            sorting: false,
+            ajax: {
+                url: '@Url.Action("MovieHandler")',
+                method: 'POST',
+                data: model
+            },
+            columns: [
+                { data: 'name' },
+                { data: 'director' },
+                { data: 'theme' },
+                { data: 'note' },
+                {
+                    data: null,
+                    sortable: false,
+                    render: function change(data, type) {
+                        return '<button class="btn btn-success btn-sm center-block btn-edit">Изменить</button>';
+                    }
+                },
+                {
+                    data: null,
+                    sortable: false,
+                    render: function del(data, type) {
+                        return '<button class="btn btn-success btn-sm center-block btn-delete">Удалить</button>';
+                    }
+                },
+            ],
+            createdRow: function (nRow, data) {
+                $(nRow).find('.btn-edit').on('click', function () {
+                    var movieId = data.id;
+                    var url = '@Url.Action("EditMovie", "Movie")';
+                    window.location.href = url + '?id=' + movieId;
+                });
+
+                $(nRow).find('.btn-delete').on('click', function () {
+                    var movieId = data.id;
+                    var url = '@Url.Action("DeleteMovie", "Movie")';
+                    window.location.href = url + '?id=' + movieId;
+                });
+
+                for (var i = 0; i < taskTable.columns().header().length - 2; i++) {
+                    $('td', nRow).eq(i).css('cursor', 'pointer');
+                }
+            }
+            // createdRow: function change(nRow, data) {
+            //     var handlerComplete = function () {
+            //         var movieId = data.id;
+            //         var url = '@*Url.Action("EditMovie", "Movie")'*@; // Убедитесь, что контроллер и метод указаны правильно
+            //         window.location.href = url + '?id=' + movieId;
+            //     }
+            //     for (var i = 0; i < taskTable.columns().header().length - 1; i++) {
+            //         $('td', nRow).eq(i).css('cursor', 'pointer');
+            //         $('td', nRow).eq(i).on('click', null);
+            //     }
+            //     $('td button', nRow).on('click', handlerComplete);
+            // }
+        });
+
+        function model() {
+            return {
+                Name: $('input[name="nameMovie"]').val(),
+                Priority: $('#prioritySearch option:selected').val()
+            }
+        }
+
+        $('input[name="nameMovie"]').on('change', function () {
+            taskTable.draw();
+        })
+        $('input[name="directorMovie"]').on('change', function () {
+            taskTable.draw();
+        })
+        $('input[name="themeMovie"]').on('change', function () {
+            taskTable.draw();
+        })
+        $('input[name="textMovie]').on('change', function () {
+            taskTable.draw();
+        })
+
+    </script>
+}
